@@ -28,12 +28,9 @@ Plug 'nvim-treesitter/nvim-treesitter', {'do': ':TSUpdate'}
 Plug 'maxmellon/vim-jsx-pretty'  
 Plug 'JoosepAlviste/nvim-ts-context-commentstring'
 Plug 'glepnir/lspsaga.nvim'
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
 Plug 'windwp/nvim-ts-autotag'
 Plug 'windwp/nvim-autopairs'
 Plug 'norcalli/nvim-colorizer.lua'
-Plug 'neovim/nvim-lspconfig'
-Plug 'jose-elias-alvarez/null-ls.nvim'
 Plug 'tpope/vim-fugitive'
 Plug 'github/copilot.vim'
 Plug 'tpope/vim-commentary'
