@@ -134,42 +134,42 @@ require("lazy").setup({
       require("colorizer").setup {}
     end,
   },
-  {
-    "jose-elias-alvarez/null-ls.nvim",
-    dependencies = { "nvim-lua/plenary.nvim" },
-    config = function()
-      local null_ls = require "null-ls"
+  -- {
+  --   "jose-elias-alvarez/null-ls.nvim",
+  --   dependencies = { "nvim-lua/plenary.nvim" },
+  --   config = function()
+  --     local null_ls = require "null-ls"
 
-      null_ls.setup {
-        sources = {
-          null_ls.builtins.formatting.prettier.with {
-            extra_filetypes = {
-              "javascript",
-              "typescript",
-              "json",
-              "css",
-              "html",
-              "markdown",
-              "typescriptreact",
-              "javascriptreact",
-            },
-          },
-        },
-        on_attach = function(client, bufnr)
-          if client.server_capabilities.documentFormattingProvider then
-            vim.api.nvim_create_augroup("LspFormatting", { clear = true })
-            vim.api.nvim_create_autocmd("BufWritePre", {
-              group = "LspFormatting",
-              buffer = bufnr,
-              callback = function()
-                vim.lsp.buf.format()
-              end,
-            })
-          end
-        end,
-      }
-    end,
-  },
+  --     null_ls.setup {
+  --       sources = {
+  --         null_ls.builtins.formatting.prettier.with {
+  --           extra_filetypes = {
+  --             "javascript",
+  --             "typescript",
+  --             "json",
+  --             "css",
+  --             "html",
+  --             "markdown",
+  --             "typescriptreact",
+  --             "javascriptreact",
+  --           },
+  --         },
+  --       },
+  --       on_attach = function(client, bufnr)
+  --         if client.server_capabilities.documentFormattingProvider then
+  --           vim.api.nvim_create_augroup("LspFormatting", { clear = true })
+  --           vim.api.nvim_create_autocmd("BufWritePre", {
+  --             group = "LspFormatting",
+  --             buffer = bufnr,
+  --             callback = function()
+  --               vim.lsp.buf.format()
+  --             end,
+  --           })
+  --         end
+  --       end,
+  --     }
+  --   end,
+  -- },
   {
     "ruifm/gitlinker.nvim",
     requires = {
@@ -214,35 +214,35 @@ require "nvchad.autocmds"
 -- LANGUAGE SERVERS
 -- LSP and Null-LS setup
 local lspconfig = require "lspconfig"
-local null_ls = require "null-ls"
+-- local null_ls = require "null-ls"
 
 -- Setup null-ls with formatters
-null_ls.setup {
-  sources = {
-    null_ls.builtins.formatting.prettier, -- For JavaScript, TypeScript, etc.
-    null_ls.builtins.formatting.stylua, -- For Lua
-    null_ls.builtins.formatting.black, -- For Python
-    null_ls.builtins.formatting.sql_formatter, -- For SQL
-    -- Add other formatters as needed
-  },
-  on_attach = function(client, bufnr)
-    if client.resolved_capabilities.document_formatting then
-      vim.cmd [[
-        augroup LspFormatting
-          autocmd! * <buffer>
-          autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()
-        augroup END
-      ]]
-    end
-  end,
-}
+-- null_ls.setup {
+--   sources = {
+--     null_ls.builtins.formatting.prettier, -- For JavaScript, TypeScript, etc.
+--     null_ls.builtins.formatting.stylua, -- For Lua
+--     null_ls.builtins.formatting.black, -- For Python
+--     null_ls.builtins.formatting.sql_formatter, -- For SQL
+--     -- Add other formatters as needed
+--   },
+--   on_attach = function(client, bufnr)
+--     if client.resolved_capabilities.document_formatting then
+--       vim.cmd [[
+--         augroup LspFormatting
+--           autocmd! * <buffer>
+--           autocmd BufWritePre <buffer> lua vim.lsp.buf.formatting_sync()
+--         augroup END
+--       ]]
+--     end
+--   end,
+-- }
 
 -- Setup LSP servers
-lspconfig.tsserver.setup {
-  on_attach = function(client, bufnr)
-    client.resolved_capabilities.document_formatting = false -- Use null-ls for formatting
-  end,
-}
+-- lspconfig.tsserver.setup {
+--   on_attach = function(client, bufnr)
+--     client.resolved_capabilities.document_formatting = false -- Use null-ls for formatting
+--   end,
+-- }
 
 lspconfig.pyright.setup {}
 -- lspconfig.sumneko_lua.setup({
