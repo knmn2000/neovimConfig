@@ -32,6 +32,15 @@ dofile(vim.g.base46_cache .. "statusline")
 require "options"
 require "autocmds"
 
+require('gitsigns').setup({
+  current_line_blame = true, -- Toggle with `:Gitsigns toggle_current_line_blame`
+  current_line_blame_opts = {
+    virt_text = true,
+    virt_text_pos = 'eol', -- 'eol' | 'overlay' | 'right_align'
+    delay = 500,
+  },
+})
+
 vim.schedule(function()
   require "mappings"
 end)

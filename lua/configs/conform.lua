@@ -2,34 +2,31 @@ local options = {
   formatters_by_ft = {
     lua = { "stylua" },
     python = { "isort", "black" },
-    javascript = { { "prettierd", "prettier" } },
-    typescript = { { "prettierd", "prettier" } },
-    typescriptreact = { { "prettierd", "prettier" } },
-    javascriptreact = { { "prettierd", "prettier" } },
-    json = { { "prettierd", "prettier" } },
-    jsonc = { { "prettierd", "prettier" } },
-    html = { { "prettierd", "prettier" } },
-    css = { { "prettierd", "prettier" } },
-    scss = { { "prettierd", "prettier" } },
-    markdown = { { "prettierd", "prettier" } },
-    yaml = { { "prettierd", "prettier" } },
+
+    -- Web Development (Stop after first available: prettierd OR prettier)
+    javascript = { "prettierd", "prettier", stop_after_first = true },
+    typescript = { "prettierd", "prettier", stop_after_first = true },
+    typescriptreact = { "prettierd", "prettier", stop_after_first = true },
+    javascriptreact = { "prettierd", "prettier", stop_after_first = true },
+    json = { "prettierd", "prettier", stop_after_first = true },
+    jsonc = { "prettierd", "prettier", stop_after_first = true },
+    html = { "prettierd", "prettier", stop_after_first = true },
+    css = { "prettierd", "prettier", stop_after_first = true },
+    scss = { "prettierd", "prettier", stop_after_first = true },
+    markdown = { "prettierd", "prettier", stop_after_first = true },
+    yaml = { "prettierd", "prettier", stop_after_first = true },
+
+    -- Others
     go = { "gofmt", "goimports" },
     c = { "clang_format" },
     cpp = { "clang_format" },
     sql = { "sqlfmt" },
-    -- css = { "prettier" },
-    -- html = { "prettier" },
   },
+
   format_on_save = {
     timeout_ms = 500,
     lsp_fallback = true,
   },
-
-  -- format_on_save = {
-  --   -- These options will be passed to conform.format()
-  --   timeout_ms = 500,
-  --   lsp_fallback = true,
-  -- },
 }
 
 return options

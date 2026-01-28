@@ -1,6 +1,7 @@
 require("nvchad.configs.lspconfig").defaults()
 
-local servers = { "html", "cssls", "clangd", "gopls", "pyright"}
-vim.lsp.enable(servers)
+-- Added 'vtsls' (the better typescript lsp), 'eslint', and 'tailwindcss'
+local servers = { "html", "cssls", "clangd", "gopls", "pyright", "vtsls", "eslint", "tailwindcss" }
 
--- read :h vim.lsp.config for changing options of lsp servers 
+-- This enables the servers and handles the default NvChad setup
+vim.lsp.enable(servers)
