@@ -14,10 +14,12 @@ map("n", "<C-_>", "gcc", { desc = "toggle comment", remap = true })
 map("v", "<C-_>", "gc", { desc = "toggle comment", remap = true })
 
 -- map({ "n", "i", "v" }, "<C-s>", "<cmd> w <cr>")
--- Alt+[ / Alt+] vertical resize only
-map("n", "<A-[>", "<cmd>vertical resize -5<cr>")
-map("n", "<A-]>", "<cmd>vertical resize +5<cr>")
--- Ctrl+[ / Ctrl+] resize current window (both horizontal and vertical)
-map("n", "<C-[>", "<cmd>resize -5<cr><cmd>vertical resize -5<cr>", { desc = "Decrease window size" })
-map("n", "<C-]>", "<cmd>resize +5<cr><cmd>vertical resize +5<cr>", { desc = "Increase window size" })
+-- Alt+[ / Alt+] resize current window (both horizontal and vertical)
+-- Note: Ctrl+[ is Escape in all terminals, so it can't be remapped
+map("n", "<A-[>", "<cmd>resize -5<cr><cmd>vertical resize -5<cr>", { desc = "Decrease window size" })
+map("n", "<A-]>", "<cmd>resize +5<cr><cmd>vertical resize +5<cr>", { desc = "Increase window size" })
+
+-- Hide terminal buffer without closing it (keeps process alive)
+map("n", "<leader>th", "<cmd>b#<cr>", { desc = "Hide terminal (switch to previous buffer)" })
+map("t", "<A-h>", "<C-\\><C-n><cmd>b#<cr>", { desc = "Hide terminal from terminal mode" })
 

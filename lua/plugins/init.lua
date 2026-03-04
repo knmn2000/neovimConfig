@@ -37,6 +37,8 @@ return {
       require("nvchad.configs.lspconfig").defaults()
 
       -- Use modern Neovim 0.11+ API
+      local mingw_bin = "C:/Users/Admin/AppData/Local/Microsoft/WinGet/Packages/"
+        .. "BrechtSanders.WinLibs.POSIX.UCRT_Microsoft.Winget.Source_8wekyb3d8bbwe/mingw64/bin"
       vim.lsp.config("clangd", {
         cmd = {
           "clangd",
@@ -44,13 +46,8 @@ return {
           "--clang-tidy",
           "--header-insertion=never",
           "--offset-encoding=utf-16",
+          "--query-driver=" .. mingw_bin .. "/g*.exe",
         },
-        init_options = {
-          fallbackFlags = {
-            "-I/opt/homebrew/include",
-          },
-        },
-        -- root_dir is vital for clangd to find the config.yaml or .git
         root_dir = vim.fs.root(0, { ".git", "compile_commands.json", "compile_flags.txt", ".clangd" }),
       })
 
@@ -65,7 +62,7 @@ return {
     event = "VeryLazy",
     lazy = false,
     version = false,
-    build = "make",
+    build = "powershell -ExecutionPolicy Bypass -File Build.ps1 -BuildFromSource false",
     opts = {
       provider = "gpt-5.2",
       auto_suggestions_provider = "gpt-5.2",
