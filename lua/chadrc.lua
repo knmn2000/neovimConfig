@@ -6,7 +6,10 @@
 local M = {}
 
 M.base46 = {
-	theme = "chadracula-evondev",
+	theme = "vscode_dark",
+
+  modules = { "mode", "file", "git", "lsp", "cwd", "cursor" },
+  order = { "mode", "file", "git", "%=", "lsp", "cursor" },
 
 	-- hl_override = {
 	-- 	Comment = { italic = true },

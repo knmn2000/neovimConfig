@@ -4,11 +4,29 @@ return {
     "nvim-telescope/telescope.nvim",
     opts = function(_, opts)
       opts = opts or {}
+
+      -- 1. Add global ignore patterns to 'defaults'
+      -- These are Lua regex patterns, so we escape dots with %
+      opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
+        file_ignore_patterns = {
+          "node_modules/.*",
+          "%.git/.*",
+          "build/.*",
+          "dist/.*",
+          "target/.*",
+          "bin/.*",
+          "obj/.*",
+          ".next/.*",
+        },
+      })
+
+      -- 2. Keep your specific find_files overrides
       opts.pickers = opts.pickers or {}
       opts.pickers.find_files = vim.tbl_deep_extend("force", opts.pickers.find_files or {}, {
-        no_ignore = true,
-        hidden = true,
+        no_ignore = true, -- Search files in .gitignore (like .env)
+        hidden = true,    -- Search dotfiles
       })
+
       return opts
     end,
   },
@@ -98,6 +116,48 @@ return {
     },
   },
 
+  -- Diffview: load on command so DiffviewOpen is always available
+  {
+    "sindrets/diffview.nvim",
+    cmd = { "DiffviewOpen", "DiffviewClose", "DiffviewFileHistory", "DiffviewToggleFiles" },
+    config = function()
+      -- Background-only diff highlights so treesitter syntax colors show through
+      -- on added/changed lines. Diffview's windows remap DiffAdd->DiffviewDiffAdd
+      -- etc. via winhl, so we must override THESE groups (not the base ones).
+      local function set_diff_hl()
+        vim.api.nvim_set_hl(0, "DiffviewDiffAdd",    { bg = "#16331f" }) -- added line: green tint
+        vim.api.nvim_set_hl(0, "DiffviewDiffText",   { bg = "#2c5e3a" }) -- changed words: brighter green
+        vim.api.nvim_set_hl(0, "DiffviewDiffChange", { bg = "#16331f" }) -- changed line: green tint
+        vim.api.nvim_set_hl(0, "DiffviewDiffDelete", { bg = "#3a1618" }) -- deleted: red tint
+      end
+
+      require("diffview").setup({
+        view = {
+          default      = { layout = "diff2_horizontal", winbar_info = false },
+          file_history = { layout = "diff2_horizontal", winbar_info = false },
+        },
+        enhanced_diff_hl = true,
+        hooks = {
+          diff_buf_win_enter = function(bufnr, _winid)
+            -- attach treesitter after buffer is fully loaded in the window
+            vim.api.nvim_buf_call(bufnr, function()
+              if vim.bo[bufnr].filetype == "" then
+                vim.cmd("filetype detect")
+              end
+              pcall(vim.treesitter.start, bufnr)
+            end)
+          end,
+        },
+      })
+
+      set_diff_hl()
+      -- Re-apply on theme change and every time a diff buffer is shown, so our
+      -- colors always win over the base46 theme (which loads after startup).
+      vim.api.nvim_create_autocmd("ColorScheme", { callback = set_diff_hl })
+      vim.api.nvim_create_autocmd("User", { pattern = "DiffviewDiffBufWinEnter", callback = set_diff_hl })
+    end,
+  },
+
   -- Neogit
   {
     "NeogitOrg/neogit",
@@ -106,11 +166,161 @@ return {
       "sindrets/diffview.nvim",
     },
     cmd = "Neogit",
-    keys = {
-      { "<leader>gg", function() require("neogit").open({ kind = "vsplit" }) end, desc = "Neogit (vertical)" },
-    },
     opts = {
       integrations = { diffview = true },
     },
   },
+  -- DAP: Debugger for JS/TS/Node (loads only when a debug key is pressed)
+  {
+    "mfussenegger/nvim-dap",
+    dependencies = {
+      "rcarriga/nvim-dap-ui",
+      "nvim-neotest/nvim-nio",
+      {
+        "jay-babu/mason-nvim-dap.nvim",
+        dependencies = "williamboman/mason.nvim",
+        opts = {
+          ensure_installed = { "js" }, -- installs js-debug-adapter (prebuilt, no build step)
+          automatic_installation = true,
+          handlers = {},               -- we configure adapters manually below
+        },
+      },
+    },
+    keys = {
+      { "<leader>db", function() require("dap").toggle_breakpoint() end, desc = "Debug: toggle breakpoint" },
+      { "<leader>dc", function() require("dap").continue() end,          desc = "Debug: start / continue" },
+      { "<leader>dn", function() require("dap").step_over() end,         desc = "Debug: step over" },
+      { "<leader>di", function() require("dap").step_into() end,         desc = "Debug: step into" },
+      { "<leader>do", function() require("dap").step_out() end,          desc = "Debug: step out" },
+      { "<leader>dq", function() require("dap").terminate() end,         desc = "Debug: stop" },
+      { "<leader>du", function() require("dapui").toggle() end,          desc = "Debug: toggle UI" },
+      { "<leader>dr", function() require("dap").repl.open() end,         desc = "Debug: open REPL" },
+      { "<leader>dB", function() require("dap").set_breakpoint(vim.fn.input("Breakpoint condition: ")) end, desc = "Debug: conditional breakpoint" },
+    },
+    config = function()
+      local dap = require("dap")
+      local dapui = require("dapui")
+
+      -- js-debug adapter installed via mason (js-debug-adapter)
+      dap.adapters["pwa-node"] = {
+        type = "server",
+        host = "localhost",
+        port = "${port}",
+        executable = {
+          command = "node",
+          args = {
+            vim.fn.stdpath("data") .. "/mason/packages/js-debug-adapter/js-debug/src/dapDebugServer.js",
+            "${port}",
+          },
+        },
+      }
+
+      -- JS/TS debug configurations
+      for _, language in ipairs({ "javascript", "typescript", "javascriptreact", "typescriptreact" }) do
+        dap.configurations[language] = {
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Launch file",
+            program = "${file}",
+            cwd = "${workspaceFolder}",
+            sourceMaps = true,
+            console = "integratedTerminal",
+          },
+          {
+            type = "pwa-node",
+            request = "attach",
+            name = "Attach to process (--inspect)",
+            processId = require("dap.utils").pick_process,
+            cwd = "${workspaceFolder}",
+            sourceMaps = true,
+          },
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Debug Jest test",
+            runtimeExecutable = "node",
+            runtimeArgs = { "--inspect-brk", "${workspaceFolder}/node_modules/.bin/jest", "--runInBand" },
+            console = "integratedTerminal",
+            internalConsoleOptions = "neverOpen",
+            cwd = "${workspaceFolder}",
+          },
+        }
+      end
+
+      -- Auto open/close UI
+      dapui.setup()
+      dap.listeners.after.event_initialized["dapui_config"] = function() dapui.open() end
+      dap.listeners.before.event_terminated["dapui_config"] = function() dapui.close() end
+      dap.listeners.before.event_exited["dapui_config"] = function() dapui.close() end
+    end,
+  },
+
+  {
+    "andymass/vim-matchup",
+    setup = function()
+      -- may set any options here
+      vim.g.matchup_matchparen_offscreen = { method = "popup" }
+    end,
+  },
+  {
+    "jake-stewart/multicursor.nvim",
+    branch = "1.0",
+    config = function()
+      local mc = require("multicursor-nvim")
+      mc.setup()
+
+      local set = vim.keymap.set
+
+      -- Add or skip cursor above/below the main cursor.
+      set({ "n", "x" }, "<up>", function() mc.lineAddCursor(-1) end)
+      set({ "n", "x" }, "<down>", function() mc.lineAddCursor(1) end)
+      set({ "n", "x" }, "<leader><up>", function() mc.lineSkipCursor(-1) end)
+      set({ "n", "x" }, "<leader><down>", function() mc.lineSkipCursor(1) end)
+
+      -- Add or skip adding a new cursor by matching word/selection
+      set({ "n", "x" }, "<leader>n", function() mc.matchAddCursor(1) end)
+      set({ "n", "x" }, "<leader>s", function() mc.matchSkipCursor(1) end)
+      set({ "n", "x" }, "<leader>N", function() mc.matchAddCursor(-1) end)
+      set({ "n", "x" }, "<leader>S", function() mc.matchSkipCursor(-1) end)
+
+      -- Add and remove cursors with control + left click.
+      set("n", "<c-leftmouse>", mc.handleMouse)
+      set("n", "<c-leftdrag>", mc.handleMouseDrag)
+      set("n", "<c-leftrelease>", mc.handleMouseRelease)
+
+      -- Disable and enable cursors.
+      set({ "n", "x" }, "<c-q>", mc.toggleCursor)
+
+      -- Mappings defined in a keymap layer only apply when there are
+      -- multiple cursors. This lets you have overlapping mappings.
+      mc.addKeymapLayer(function(layerSet)
+        -- Select a different cursor as the main one.
+        layerSet({ "n", "x" }, "<left>", mc.prevCursor)
+        layerSet({ "n", "x" }, "<right>", mc.nextCursor)
+
+        -- Delete the main cursor.
+        layerSet({ "n", "x" }, "<leader>x", mc.deleteCursor)
+
+        -- Enable and clear cursors using escape.
+        layerSet("n", "<esc>", function()
+          if not mc.cursorsEnabled() then
+            mc.enableCursors()
+          else
+            mc.clearCursors()
+          end
+        end)
+      end)
+
+      -- Customize how cursors look.
+      local hl = vim.api.nvim_set_hl
+      hl(0, "MultiCursorCursor", { reverse = true })
+      hl(0, "MultiCursorVisual", { link = "Visual" })
+      hl(0, "MultiCursorSign", { link = "SignColumn" })
+      hl(0, "MultiCursorMatchPreview", { link = "Search" })
+      hl(0, "MultiCursorDisabledCursor", { reverse = true })
+      hl(0, "MultiCursorDisabledVisual", { link = "Visual" })
+      hl(0, "MultiCursorDisabledSign", { link = "SignColumn" })
+    end
+  }
 }
