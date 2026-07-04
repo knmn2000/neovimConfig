@@ -5,38 +5,34 @@ return {
     opts = function(_, opts)
       opts = opts or {}
 
-      -- 1. Add global ignore patterns to 'defaults'
-      -- These are Lua regex patterns, so we escape dots with %
-      opts.defaults = vim.tbl_deep_extend("force", opts.defaults or {}, {
-        file_ignore_patterns = {
-          "node_modules/.*",
-          "%.git/.*",
-          "build/.*",
-          "dist/.*",
-          "target/.*",
-          "bin/.*",
-          "obj/.*",
-          ".next/.*",
-        },
-      })
-
       -- 2. Keep your specific find_files overrides
       opts.pickers = opts.pickers or {}
       opts.pickers.find_files = vim.tbl_deep_extend("force", opts.pickers.find_files or {}, {
-        no_ignore = true, -- Search files in .gitignore (like .env)
-        hidden = true,    -- Search dotfiles
+        -- no_ignore = true was removed: it bypassed .gitignore so fd traversed all of
+        -- node_modules/, .next/, build/ etc before Lua patterns filtered them out — very slow.
+        -- hidden = true is enough to show dotfiles (.env, .env.local) while still
+        -- respecting .gitignore (fd never enters gitignored dirs).
+        hidden = true,
+        find_command = { "fd", "--type", "f", "--hidden", "--strip-cwd-prefix",
+          "--exclude", ".git",
+          "--exclude", "node_modules",
+          "--exclude", "build",
+          "--exclude", "dist",
+          "--exclude", ".next",
+          "--exclude", "target",
+        },
       })
 
       return opts
     end,
   },
 
-  -- Override nvim-tree: hide dotfiles but always show .env files
+  -- Override nvim-tree: show dotfiles / hidden folders
   {
     "nvim-tree/nvim-tree.lua",
     opts = {
       filters = {
-        dotfiles = true,
+        dotfiles = false, -- false = show hidden files/folders (.git, .husky, etc.)
         custom = {},
         exclude = { "%.env", "%.env%.local", "%.env%." },
       },
