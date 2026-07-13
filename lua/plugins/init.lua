@@ -252,6 +252,15 @@ return {
     end,
   },
 
+  -- Cursor smear/trail effect
+  {
+    "sphamba/smear-cursor.nvim",
+    event = "VeryLazy",
+    config = function()
+      require("smear_cursor").setup({})
+    end,
+  },
+
   {
     "andymass/vim-matchup",
     setup = function()
