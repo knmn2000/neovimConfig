@@ -1,4 +1,35 @@
 return {
+  -- Replaces blocking cmdline echo (which triggers "Press ENTER to continue"
+  -- hit-enter prompts on long/multi-line messages, e.g. LSP errors) with
+  -- async floating toasts that never steal focus.
+  {
+    "rcarriga/nvim-notify",
+    lazy = false,
+    priority = 1000,
+    config = function()
+      local notify = require "notify"
+      notify.setup {
+        stages = "fade",
+        timeout = 3000,
+        render = "compact",
+        max_width = 60, -- cap toast width so a wall-of-text error doesn't fill the screen
+      }
+
+      -- Swallow repeats of the same message within a few seconds so a
+      -- misbehaving LSP server (e.g. eslint erroring on every keystroke)
+      -- doesn't stack a new toast on top of the last one.
+      local last_msg, last_time
+      vim.notify = function(msg, level, opts)
+        local now = vim.uv.now()
+        if msg == last_msg and last_time and (now - last_time) < 5000 then
+          return
+        end
+        last_msg, last_time = msg, now
+        return notify(msg, level, opts)
+      end
+    end,
+  },
+
   -- Telescope: show .env and other gitignored/hidden files in find_files (<leader>ff)
   {
     "nvim-telescope/telescope.nvim",
@@ -73,45 +104,6 @@ return {
       require "configs.lspconfig"
     end,
   },
-  -- AI Assistant (Avante)
-  {
-    "yetone/avante.nvim",
-    event = "VeryLazy",
-    lazy = false,
-    version = false,
-    build = "make",
-    opts = {
-      provider = "gpt-5.2",
-      auto_suggestions_provider = "gpt-5.2",
-      behaviour = {
-        auto_suggestions = true,
-      },
-      providers = {
-        ["gpt-5.2"] = {
-          __inherited_from = "openai",
-          model = "gpt-5.2",
-          timeout = 30000,
-          extra_request_body = {
-            temperature = 0,
-            max_completion_tokens = 20480,
-          },
-        },
-      },
-    },
-    dependencies = {
-      "stevearc/dressing.nvim",
-      "nvim-lua/plenary.nvim",
-      "MunifTanjim/nui.nvim",
-      "nvim-tree/nvim-web-devicons",
-      "nvim-treesitter/nvim-treesitter",
-      {
-        "MeanderingProgrammer/render-markdown.nvim",
-        opts = { file_types = { "markdown", "Avante" } },
-        ft = { "markdown", "Avante" },
-      },
-    },
-  },
-
   -- Diffview: load on command so DiffviewOpen is always available
   {
     "sindrets/diffview.nvim",
