@@ -28,6 +28,15 @@ map("n", "<leader>cp", function()
   vim.notify('Copied relative path: ' or path)
 end, { desc = "Copy relative path to clipboard" })
 
+-- Find files filtered by extension, e.g. type "tsx" to search only *.tsx
+map("n", "<leader>fx", function()
+  local ext = vim.fn.input("Extension (no dot): ")
+  if ext == "" then return end
+  require("telescope.builtin").find_files({
+    find_command = { "fd", "--type", "f", "--hidden", "--strip-cwd-prefix", "-e", ext },
+  })
+end, { desc = "Find files by extension" })
+
 local mc = require("multicursor-nvim")
 
 -- Add or skip adding a new cursor by matching word/selection
