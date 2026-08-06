@@ -39,12 +39,12 @@ return {
       -- 2. Keep your specific find_files overrides
       opts.pickers = opts.pickers or {}
       opts.pickers.find_files = vim.tbl_deep_extend("force", opts.pickers.find_files or {}, {
-        -- no_ignore = true was removed: it bypassed .gitignore so fd traversed all of
-        -- node_modules/, .next/, build/ etc before Lua patterns filtered them out — very slow.
-        -- hidden = true is enough to show dotfiles (.env, .env.local) while still
-        -- respecting .gitignore (fd never enters gitignored dirs).
+        -- hidden = true shows dotfiles, but .env is also gitignored (a file, not a
+        -- dir), so fd was still skipping it under .gitignore rules. --no-ignore turns
+        -- that off; --exclude below still prunes the heavy dirs, so it stays fast.
         hidden = true,
-        find_command = { "fd", "--type", "f", "--hidden", "--strip-cwd-prefix",
+        no_ignore = true,
+        find_command = { "fd", "--type", "f", "--hidden", "--no-ignore", "--strip-cwd-prefix",
           "--exclude", ".git",
           "--exclude", "node_modules",
           "--exclude", "build",
@@ -222,6 +222,18 @@ return {
             processId = require("dap.utils").pick_process,
             cwd = "${workspaceFolder}",
             sourceMaps = true,
+          },
+          {
+            type = "pwa-node",
+            request = "launch",
+            name = "Next.js: debug dev server",
+            runtimeExecutable = "npm",
+            runtimeArgs = { "run", "dev" },
+            cwd = "${workspaceFolder}",
+            console = "integratedTerminal",
+            internalConsoleOptions = "neverOpen",
+            sourceMaps = true,
+            autoAttachChildProcesses = true, -- next dev forks the real server as a child process
           },
           {
             type = "pwa-node",
