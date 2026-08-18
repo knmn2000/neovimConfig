@@ -62,6 +62,9 @@ return {
   {
     "nvim-tree/nvim-tree.lua",
     opts = {
+      git = {
+        ignore = false, -- false = show gitignored files
+      },
       filters = {
         dotfiles = false, -- false = show hidden files/folders (.git, .husky, etc.)
         custom = {},

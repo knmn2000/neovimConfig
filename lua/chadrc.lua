@@ -6,7 +6,7 @@
 local M = {}
 
 M.base46 = {
-	theme = "vscode_dark",
+	theme = "chadracula-evondev",
 
   modules = { "mode", "file", "git", "lsp", "cwd", "cursor" },
   order = { "mode", "file", "git", "%=", "lsp", "cursor" },
@@ -15,6 +15,15 @@ M.base46 = {
 	-- 	Comment = { italic = true },
 	-- 	["@comment"] = { italic = true },
 	-- },
+}
+
+M.term = {
+  float = {
+    width = 0.6,
+    height = 0.48,
+    row = 0.26,
+    col = 0.2,
+  },
 }
 
 -- M.nvdash = { load_on_startup = true }
