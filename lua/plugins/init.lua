@@ -248,8 +248,9 @@ return {
 
   {
     "andymass/vim-matchup",
-    setup = function()
-      -- may set any options here
+    -- `init` runs before the plugin loads; `setup` is not a lazy.nvim key and
+    -- was silently ignored, so this option never took effect.
+    init = function()
       vim.g.matchup_matchparen_offscreen = { method = "popup" }
     end,
   },
