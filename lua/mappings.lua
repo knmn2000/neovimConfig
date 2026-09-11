@@ -39,16 +39,21 @@ map("n", "<leader>fx", function()
   })
 end, { desc = "Find files by extension" })
 
+-- Multicursor: sole home for the cursor-adding maps (the plugin spec keeps only
+-- the mouse maps, the in-multicursor keymap layer, and the highlights).
 local mc = require("multicursor-nvim")
 
 -- Add or skip adding a new cursor by matching word/selection
 map({ "n", "x" }, "<leader>n", function() mc.matchAddCursor(1) end, { desc = "Add cursor to next match" })
 map({ "n", "x" }, "<leader>s", function() mc.matchSkipCursor(1) end, { desc = "Skip next match" })
 map({ "n", "x" }, "<leader>N", function() mc.matchAddCursor(-1) end, { desc = "Add cursor to prev match" })
+map({ "n", "x" }, "<leader>S", function() mc.matchSkipCursor(-1) end, { desc = "Skip prev match" })
 
 -- Up and Down arrows for column mode
-map({ "n", "x" }, "<up>", function() mc.lineAddCursor(-1) end)
-map({ "n", "x" }, "<down>", function() mc.lineAddCursor(1) end)
+map({ "n", "x" }, "<up>", function() mc.lineAddCursor(-1) end, { desc = "Add cursor above" })
+map({ "n", "x" }, "<down>", function() mc.lineAddCursor(1) end, { desc = "Add cursor below" })
+map({ "n", "x" }, "<leader><up>", function() mc.lineSkipCursor(-1) end, { desc = "Skip cursor above" })
+map({ "n", "x" }, "<leader><down>", function() mc.lineSkipCursor(1) end, { desc = "Skip cursor below" })
 
 -- Git keybinds (gitsigns + neogit + diffview).
 -- gitsigns is loaded eagerly in init.lua; require lazily inside callbacks so a
