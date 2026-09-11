@@ -77,17 +77,6 @@ map("n", "<leader>gh", "<cmd>DiffviewFileHistory %<CR>",                        
 map("n", "<leader>gH", "<cmd>DiffviewFileHistory<CR>",                             { desc = "Git: repo history" })
 map("n", "<leader>gx", "<cmd>DiffviewClose<CR>",                                   { desc = "Git: close diffview" })
 
--- Send visual selection to Claude terminal (clipboard + open float term)
-map("v", "<leader>da", function()
-  local start_pos = vim.fn.getpos("'<")
-  local end_pos = vim.fn.getpos("'>")
-  local lines = vim.fn.getline(start_pos[2], end_pos[2])
-
-  if type(lines) == "string" then
-    lines = { lines }
-  end
-
-  vim.fn.setreg("+", table.concat(lines, "\n"))
-  require("nvchad.term").toggle { pos = "float", id = "floatTerm" }
-  vim.notify("Selection copied! Paste in Claude with Cmd+V")
-end, { desc = "Copy selection + open Claude terminal" })
+-- Claude Code lives on <leader>a* now (see lua/plugins/claudecode.lua).
+-- The old <leader>da copy-to-clipboard-and-open-a-float workaround is replaced
+-- by <leader>as, which sends the selection over the real protocol.
