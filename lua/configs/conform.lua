@@ -23,7 +23,10 @@ local options = {
   },
 
   format_on_save = {
-    timeout_ms = 500,
+    -- 500ms was too tight: a formatter's first exec after install pays a
+    -- macOS quarantine check and silently times out, so saves stop formatting
+    -- with no error. This is a ceiling, not a delay.
+    timeout_ms = 2000,
     -- lsp_fallback is deprecated; lsp_format is the current key.
     lsp_format = "fallback",
   },
