@@ -19,13 +19,15 @@ map("n", "<A-[>", "<cmd>vertical resize -5<cr>")
 map("n", "<A-]>", "<cmd>vertical resize +5<cr>")
 map("n", "<leader>n", "<nop>")
 
--- Ctrl+[ / Ctrl+] resize current window (both horizontal and vertical)
-map("n", "<C-[>", "<cmd>resize -5<cr><cmd>vertical resize -5<cr>", { desc = "Decrease window size" })
-map("n", "<C-]>", "<cmd>resize +5<cr><cmd>vertical resize +5<cr>", { desc = "Increase window size" })
+-- Alt+- / Alt+= resize current window (both horizontal and vertical).
+-- NOT <C-[> / <C-]>: <C-[> is literally Escape (0x1b), so mapping it made every
+-- Esc in normal mode resize the window; <C-]> is jump-to-tag.
+map("n", "<A-->", "<cmd>resize -5<cr><cmd>vertical resize -5<cr>", { desc = "Decrease window size" })
+map("n", "<A-=>", "<cmd>resize +5<cr><cmd>vertical resize +5<cr>", { desc = "Increase window size" })
 map("n", "<leader>cp", function()
   local path = vim.fn.expand("%:.")
   vim.fn.setreg("+", path)
-  vim.notify('Copied relative path: ' or path)
+  vim.notify("Copied relative path: " .. path)
 end, { desc = "Copy relative path to clipboard" })
 
 -- Find files filtered by extension, e.g. type "tsx" to search only *.tsx
