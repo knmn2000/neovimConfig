@@ -82,28 +82,6 @@ return {
   {
     "neovim/nvim-lspconfig",
     config = function()
-      require("nvchad.configs.lspconfig").defaults()
-
-      -- Use modern Neovim 0.11+ API
-      vim.lsp.config("clangd", {
-        cmd = {
-          "clangd",
-          "--background-index",
-          "--clang-tidy",
-          "--header-insertion=never",
-          "--offset-encoding=utf-16",
-        },
-        init_options = {
-          fallbackFlags = {
-            "-I/opt/homebrew/include",
-          },
-        },
-        -- root_dir is vital for clangd to find the config.yaml or .git
-        root_dir = vim.fs.root(0, { ".git", "compile_commands.json", "compile_flags.txt", ".clangd" }),
-      })
-
-      vim.lsp.enable "clangd"
-
       require "configs.lspconfig"
     end,
   },
