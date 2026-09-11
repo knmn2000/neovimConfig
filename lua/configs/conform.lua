@@ -17,15 +17,15 @@ local options = {
     yaml = { "prettierd", "prettier", stop_after_first = true },
 
     -- Others
-    go = { "gofmt", "goimports" },
+    go = { "gofmt" },
     c = { "clang_format" },
     cpp = { "clang_format" },
-    sql = { "sqlfmt" },
   },
 
   format_on_save = {
     timeout_ms = 500,
-    lsp_fallback = true,
+    -- lsp_fallback is deprecated; lsp_format is the current key.
+    lsp_format = "fallback",
   },
 }
 
